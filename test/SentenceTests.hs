@@ -1,4 +1,4 @@
-module SentenceTests() where
+module SentenceTests(allSentenceTests) where
 
 import Sentence
 import TestUtils

@@ -1,4 +1,6 @@
 module Main(main) where
 
-main :: IO ()
-main = putStrLn "No tests yet"
+import SentenceTests
+
+main = do
+  allSentenceTests
