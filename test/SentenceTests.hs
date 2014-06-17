@@ -51,4 +51,9 @@ toCNFCases =
     cnf $ [clause [lit "p", lit "q", nLit "r", lit "s"]]),
    (bic (val "p") (val "q"), cnf $ [clause [nLit "p", lit "q"], clause [nLit "q", lit "p"]]),
    (imp (val "p") (val "q"), cnf $ [clause [nLit "p", lit "q"]]),
-   (neg (con (neg (val "p")) (val "q")), cnf $ [clause [lit "p", nLit "q"]])]
+   (neg (con (neg (val "p")) (val "q")), cnf $ [clause [lit "p", nLit "q"]]),
+   (neg (dis (val "p") (neg (val "q"))), cnf $ [clause [nLit "p"], clause [lit "q"]]),
+   (neg (neg (neg (val "p"))), cnf $ [clause [nLit "p"]]),
+   (dis (val "p") (con (val "q") (val "r")), cnf $ [clause [lit "p", lit "q"], clause [lit "p", lit "r"]]),
+   (dis (con (val "p") (val "q")) (val "r"), cnf $ [clause [lit "p", lit "r"], clause [lit "q", lit "r"]])]
+  

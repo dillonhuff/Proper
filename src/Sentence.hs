@@ -98,7 +98,12 @@ isValidByTruthTable s = and sTruthVals
     
 -- Format conversion functions
 toCNF :: Sentence -> CNF
-toCNF = cnf . cnfClauses . removeImplication . removeBiconditional
+toCNF = cnf .
+        cnfClauses .
+        distributeConjunction .
+        pushNegation .
+        removeImplication .
+        removeBiconditional
 
 cnfClauses :: Sentence -> [Clause]
 cnfClauses (Con s1 s2) = cnfClauses s1 ++ cnfClauses s2
@@ -130,4 +135,23 @@ removeBiconditional (Bic s1 s2) = Con noBic1 noBic2
     noBic2 = Imp q p
     p = removeBiconditional s1
     q = removeBiconditional s2
-removeBiconditional s = s
+removeBiconditional (Val name) = (Val name)
+
+pushNegation :: Sentence -> Sentence
+pushNegation (Neg (Neg s)) = pushNegation s
+pushNegation (Neg (Con s1 s2)) = Dis (pushNegation (Neg s1)) (pushNegation (Neg s2))
+pushNegation (Neg (Dis s1 s2)) = Con (pushNegation (Neg s1)) (pushNegation (Neg s2))
+pushNegation s = s
+
+distributeConjunction :: Sentence -> Sentence
+distributeConjunction (Dis p (Con q r)) = Con (Dis pd qd) (Dis pd rd)
+ where
+   pd = distributeConjunction p
+   qd = distributeConjunction q
+   rd = distributeConjunction r
+distributeConjunction (Dis (Con p q) r) = Con (Dis pd rd) (Dis qd rd)
+ where
+   pd = distributeConjunction p
+   qd = distributeConjunction q
+   rd = distributeConjunction r
+distributeConjunction s = s
