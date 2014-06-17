@@ -2,11 +2,13 @@ module Sentence(
                neg, con, dis, val, bic, imp,
                truthAssignment,
                evalSentence,
-               isValidByTruthTable) where
+               isValidByTruthTable,
+               toCNF) where
 
 import Data.Map as M
 
-type Name = String
+import CNF
+import Utils
 
 data Sentence =
   Val Name              |
@@ -93,3 +95,39 @@ isValidByTruthTable s = and sTruthVals
   where
     sTruthTable = truthTableForSentence s
     sTruthVals = Prelude.map (truthVal s) sTruthTable
+    
+-- Format conversion functions
+toCNF :: Sentence -> CNF
+toCNF = cnf . cnfClauses . removeImplication . removeBiconditional
+
+cnfClauses :: Sentence -> [Clause]
+cnfClauses (Con s1 s2) = cnfClauses s1 ++ cnfClauses s2
+cnfClauses s = [disjunctiveClause s]
+
+disjunctiveClause :: Sentence -> Clause
+disjunctiveClause (Dis s1 s2) = concatClause (disjunctiveClause s1) (disjunctiveClause s2)
+disjunctiveClause (Val name) = clause [lit name]
+disjunctiveClause (Neg (Val name)) = clause [nLit name]
+
+removeImplication :: Sentence -> Sentence
+removeImplication (Neg s) = Neg $ removeImplication s
+removeImplication (Con s1 s2) = Con (removeImplication s1) (removeImplication s2)
+removeImplication (Dis s1 s2) = Dis (removeImplication s1) (removeImplication s2)
+removeImplication (Imp s1 s2) = Dis (Neg p) q
+  where
+    p = removeImplication s1
+    q = removeImplication s2
+removeImplication s = s
+
+removeBiconditional :: Sentence -> Sentence
+removeBiconditional (Neg s) = Neg $ removeBiconditional s
+removeBiconditional (Con s1 s2) = Con (removeBiconditional s1) (removeBiconditional s2)
+removeBiconditional (Dis s1 s2) = Dis (removeBiconditional s1) (removeBiconditional s2)
+removeBiconditional (Imp s1 s2) = Imp (removeBiconditional s1) (removeBiconditional s2)
+removeBiconditional (Bic s1 s2) = Con noBic1 noBic2
+  where
+    noBic1 = Imp p q
+    noBic2 = Imp q p
+    p = removeBiconditional s1
+    q = removeBiconditional s2
+removeBiconditional s = s

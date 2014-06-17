@@ -1,11 +1,13 @@
 module SentenceTests(allSentenceTests) where
 
+import CNF
 import Sentence
 import TestUtils
 
 allSentenceTests = do
   testSimpleEval
   testIsValidByTruthTable
+  testToCNF
 
 testSimpleEval =
   testFunction (evalSentence simpleTA) evalCases
@@ -38,3 +40,14 @@ isValidTTCases =
    (imp (con (val "p") (val "q")) (val "p"), True),
    (imp (dis (val "p") (val "q")) (val "p"), False),
    (bic (neg (con (val "p") (val "q"))) (dis (neg (val "p")) (neg (val "q"))), True)]
+  
+testToCNF =
+  testFunction toCNF toCNFCases
+  
+toCNFCases =
+  [(val "a", cnf $ [clause [lit "a"]]),
+   (neg (val "p"), cnf $ [clause [nLit "p"]]),
+   (dis (dis (val "p") (dis (val "q") (neg (val "r")))) (val "s"),
+    cnf $ [clause [lit "p", lit "q", nLit "r", lit "s"]]),
+   (bic (val "p") (val "q"), cnf $ [clause [nLit "p", lit "q"], clause [nLit "q", lit "p"]]),
+   (imp (val "p") (val "q"), cnf $ [clause [nLit "p", lit "q"]])]
