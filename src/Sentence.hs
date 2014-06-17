@@ -17,7 +17,18 @@ data Sentence =
   Dis Sentence Sentence |
   Bic Sentence Sentence |
   Imp Sentence Sentence
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
+           
+instance Show Sentence where
+  show = showSent
+  
+showSent :: Sentence -> String
+showSent (Val name) = name
+showSent (Neg s) = "~(" ++ show s ++ ")"
+showSent (Con s1 s2) = "(" ++ show s1 ++ " & " ++ show s2 ++ ")"
+showSent (Dis s1 s2) = "(" ++ show s1 ++ " | " ++ show s2 ++ ")"
+showSent (Bic s1 s2) = "(" ++ show s1 ++ " <-> " ++ show s2 ++ ")"
+showSent (Imp s1 s2) = "(" ++ show s1 ++ " -> " ++ show s2 ++ ")"
            
 neg sent = Neg sent
 con s1 s2 = Con s1 s2
@@ -100,7 +111,7 @@ isValidByTruthTable s = and sTruthVals
 toCNF :: Sentence -> CNF
 toCNF = cnf .
         cnfClauses .
-        distributeConjunction .
+        distributeDisjunction .
         pushNegation .
         removeImplication .
         removeBiconditional
@@ -113,6 +124,7 @@ disjunctiveClause :: Sentence -> Clause
 disjunctiveClause (Dis s1 s2) = concatClause (disjunctiveClause s1) (disjunctiveClause s2)
 disjunctiveClause (Val name) = clause [lit name]
 disjunctiveClause (Neg (Val name)) = clause [nLit name]
+disjunctiveClause s = error $ "Disjunctive clause contains " ++ show s
 
 removeImplication :: Sentence -> Sentence
 removeImplication (Neg s) = Neg $ removeImplication s
@@ -141,17 +153,17 @@ pushNegation :: Sentence -> Sentence
 pushNegation (Neg (Neg s)) = pushNegation s
 pushNegation (Neg (Con s1 s2)) = Dis (pushNegation (Neg s1)) (pushNegation (Neg s2))
 pushNegation (Neg (Dis s1 s2)) = Con (pushNegation (Neg s1)) (pushNegation (Neg s2))
+pushNegation (Con s1 s2) = Con (pushNegation s1) (pushNegation s2)
+pushNegation (Dis s1 s2) = Dis (pushNegation s1) (pushNegation s2)
 pushNegation s = s
 
-distributeConjunction :: Sentence -> Sentence
-distributeConjunction (Dis p (Con q r)) = Con (Dis pd qd) (Dis pd rd)
+distributeDisjunction :: Sentence -> Sentence
+distributeDisjunction (Dis p (Con q r)) = Con pdq pdr
  where
-   pd = distributeConjunction p
-   qd = distributeConjunction q
-   rd = distributeConjunction r
-distributeConjunction (Dis (Con p q) r) = Con (Dis pd rd) (Dis qd rd)
+   pdq = distributeDisjunction $ Dis p q
+   pdr = distributeDisjunction $ Dis p r
+distributeDisjunction (Dis (Con p q) r) = Con pdr qdr
  where
-   pd = distributeConjunction p
-   qd = distributeConjunction q
-   rd = distributeConjunction r
-distributeConjunction s = s
+   pdr = distributeDisjunction $ Dis p r
+   qdr = distributeDisjunction $ Dis q r
+distributeDisjunction s = s
