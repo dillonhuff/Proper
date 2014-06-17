@@ -157,7 +157,9 @@ pushNegation (Con s1 s2) = Con (pushNegation s1) (pushNegation s2)
 pushNegation (Dis s1 s2) = Dis (pushNegation s1) (pushNegation s2)
 pushNegation s = s
 
+-- Need to add code to handle deep disjunctions
 distributeDisjunction :: Sentence -> Sentence
+distributeDisjunction (Con p q) = Con (distributeDisjunction p) (distributeDisjunction q)
 distributeDisjunction (Dis p (Con q r)) = Con pdq pdr
  where
    pdq = distributeDisjunction $ Dis p q
