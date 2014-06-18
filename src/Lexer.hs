@@ -1,4 +1,5 @@
 module Lexer(
+  Token,
   toTokens,
   testTok) where
 

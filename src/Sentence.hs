@@ -1,9 +1,10 @@
 module Sentence(
-               neg, con, dis, val, bic, imp,
-               truthAssignment,
-               evalSentence,
-               isValidByTruthTable,
-               toCNF) where
+  Sentence,
+  neg, con, dis, val, bic, imp,
+  truthAssignment,
+  evalSentence,
+  isValidByTruthTable,
+  toCNF) where
 
 import Data.Map as M
 
