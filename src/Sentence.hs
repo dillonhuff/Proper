@@ -180,7 +180,16 @@ distributeDisjunction s = s
 
 -- Theorem code
 data Theorem = Thm [Sentence] Sentence
-               deriving (Eq, Show)
+               deriving (Eq)
+                        
+instance Show Theorem where
+  show = showThm
+  
+showThm :: Theorem -> String
+showThm (Thm axioms hyp) = "THEOREM\n" ++ axiomStr ++ "\n|=\n\n" ++ hypString
+  where
+    axiomStr = Prelude.concat $ Prelude.map (\a -> (show a) ++ "\n") axioms
+    hypString = show hyp
 
 theorem :: [Sentence] -> Sentence -> Theorem
 theorem axioms hypothesis = Thm axioms hypothesis

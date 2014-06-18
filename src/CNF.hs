@@ -76,4 +76,3 @@ removeUnitClause formula c = remainingClauses
     elemC = S.findMin c
     removeNegC = S.map (S.delete (negation elemC)) formula
     remainingClauses = S.filter (\s -> (not $ S.member elemC s)) removeNegC
-    

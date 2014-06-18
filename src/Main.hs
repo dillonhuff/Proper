@@ -17,7 +17,7 @@ main = do
     Failed errMsg -> putStrLn errMsg
     Succeeded t -> do
       putStr $ show t
-      putStrLn $ "\nis " ++ (show $ checkTheorem t)
+      putStrLn $ "\n\nis " ++ (show $ checkTheorem t)
   
 processTheoremFile thmFileContents =
   (toTokens thmFileContents >>= parseTheoremToks)
