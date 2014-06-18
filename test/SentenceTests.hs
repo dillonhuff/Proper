@@ -70,4 +70,3 @@ toCNFCases =
    (dis (dis (dis (con (dis (val "a") (val "b")) (val "c")) (val "d")) (val "e")) (val "f"),
     cnf $ [clause [lit "a", lit "b", lit "d", lit "e", lit "f"],
            clause [lit "c", lit "d", lit "e", lit "f"]])]
-  
