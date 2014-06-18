@@ -64,5 +64,10 @@ toCNFCases =
      clause [lit "z", nLit "y"]]),
    (neg (con (val "x") (neg (bic (val "y") (neg (val "z"))))),
     cnf $ [clause [nLit "x", nLit "y", nLit "z"],
-           clause [nLit "x", lit "z", lit "y"]])]
+           clause [nLit "x", lit "z", lit "y"]]),
+   (dis (val "p") (dis (val "q") (con (val "r") (val "s"))),
+    cnf $ [clause [lit "p", lit "q", lit "r"], clause [lit "p", lit "q", lit "s"]]),
+   (dis (dis (dis (con (dis (val "a") (val "b")) (val "c")) (val "d")) (val "e")) (val "f"),
+    cnf $ [clause [lit "a", lit "b", lit "d", lit "e", lit "f"],
+           clause [lit "c", lit "d", lit "e", lit "f"]])]
   

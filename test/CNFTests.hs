@@ -24,4 +24,4 @@ testNaiveSATComplicated =
   
 complicatedCases =
   [(toCNF (neg (bic (neg (con (val "p") (val "q"))) (dis (neg (val "p")) (neg (val "q"))))), False),
-   (toCNF (bic (neg (dis (val "p") (val "q"))) (con (neg (val "p")) (neg (val "q")))), True)]
+   (toCNF (bic (neg (dis (val "p") (val "q"))) (con (neg (val "p")) (neg (val "q"))))]
