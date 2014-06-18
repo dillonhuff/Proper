@@ -1,6 +1,6 @@
 module CNF(
   lit, nLit,
-  CNF, cnf,
+  CNF, cnf, mergeCNFFormulas,
   Clause, clause, concatClause,
   naiveSAT)
        where
@@ -38,6 +38,9 @@ type CNF = Set Clause
   
 cnf :: [Clause] -> CNF
 cnf clauses = S.fromList clauses
+
+mergeCNFFormulas :: [CNF] -> CNF
+mergeCNFFormulas formulas = S.foldl S.union S.empty (S.fromList formulas)
 
 literals :: CNF -> Set Atom
 literals formula = S.foldl S.union S.empty (S.map (S.map literal) formula)

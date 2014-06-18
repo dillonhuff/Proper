@@ -1,0 +1,7 @@
+AXIOMS:
+a -> b
+b -> c
+c -> d
+
+HYPOTHESIS:
+a -> d

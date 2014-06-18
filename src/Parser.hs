@@ -1,5 +1,6 @@
 module Parser(
-  parseFormula) where
+  parseFormula,
+  parseTheoremToks) where
 
 import Lexer
 import Sentence
@@ -7,6 +8,25 @@ import Text.Parsec.Expr
 import Text.Parsec.Pos
 import Text.Parsec.Prim
 import Utils
+
+parseTheoremToks toks = case parse parseTheorem "PARSER" toks of
+  Left err -> Failed $ show err
+  Right thm -> Succeeded thm
+
+parseTheorem = do
+  axioms <- parseAxioms
+  hypothesis <- parseHypothesis
+  return $ theorem axioms hypothesis
+  
+parseAxioms = do
+  propTok "AXIOMS:"
+  axioms <- many parseForm
+  return axioms
+  
+parseHypothesis = do
+  propTok "HYPOTHESIS:"
+  hypothesis <- parseForm
+  return hypothesis
 
 parseFormula :: [Token] -> Error Sentence
 parseFormula toks = case parse parseForm "PARSER" toks of

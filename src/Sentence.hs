@@ -1,10 +1,10 @@
 module Sentence(
-  Sentence,
+  Sentence, checkTheorem,
   neg, con, dis, val, bic, imp,
   truthAssignment,
   evalSentence,
   isValidByTruthTable,
-  toCNF) where
+  toCNF, theorem) where
 
 import Data.Map as M
 
@@ -19,7 +19,7 @@ data Sentence =
   Bic Sentence Sentence |
   Imp Sentence Sentence
   deriving (Eq, Ord)
-           
+
 instance Show Sentence where
   show = showSent
   
@@ -177,3 +177,17 @@ distributeDisjunction (Dis p q) = case pd of
     pd = distributeDisjunction p
     qd = distributeDisjunction q
 distributeDisjunction s = s
+
+-- Theorem code
+data Theorem = Thm [Sentence] Sentence
+               deriving (Eq, Show)
+
+theorem :: [Sentence] -> Sentence -> Theorem
+theorem axioms hypothesis = Thm axioms hypothesis
+
+checkTheorem :: Theorem -> Bool
+checkTheorem (Thm axioms hypothesis) = not $ naiveSAT cnfFormNegThm
+  where
+    cnfAxioms = Prelude.map toCNF axioms
+    cnfNotHypothesis = toCNF (neg hypothesis)
+    cnfFormNegThm = mergeCNFFormulas (cnfNotHypothesis:cnfAxioms)
