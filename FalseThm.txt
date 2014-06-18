@@ -1,0 +1,6 @@
+AXIOMS:
+a <-> b
+~c | (~d & a)
+
+HYPOTHESIS:
+a | b
