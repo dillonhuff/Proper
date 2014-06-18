@@ -11,15 +11,15 @@ testLexerOneToken =
   testFunction (extractValue . toTokens) oneTokenCases
   
 oneTokenCases =
-  [("p", [testTok "p"]),
-   ("p123", [testTok "p123"]),
-   ("aBRACADABRA", [testTok "aBRACADABRA"]),
-   ("AXIOMS:", [testTok "AXIOMS:"]),
-   ("HYPOTHESIS:", [testTok "HYPOTHESIS:"]),
-   ("(", [testTok "("]),
-   (")", [testTok ")"]),
-   ("&", [testTok "&"]),
-   ("|", [testTok "|"]),
-   ("~", [testTok "~"]),
-   ("->", [testTok "->"]),
-   ("<->", [testTok "<->"])]
+  [("p", [testId "p"]),
+   ("p123", [testId "p123"]),
+   ("aBRACADABRA", [testId "aBRACADABRA"]),
+   ("AXIOMS:", [testRes "AXIOMS:"]),
+   ("HYPOTHESIS:", [testRes "HYPOTHESIS:"]),
+   ("(", [testSep "("]),
+   (")", [testSep ")"]),
+   ("&", [testOp "&"]),
+   ("|", [testOp "|"]),
+   ("~", [testOp "~"]),
+   ("->", [testOp "->"]),
+   ("<->", [testOp "<->"])]

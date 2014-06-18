@@ -1,13 +1,18 @@
 module Lexer(
-  Token,
+  Token, name, pos,
+  isId,
   toTokens,
-  testTok) where
+  testId, testRes, testOp, testSep) where
 
 import Text.Parsec.Pos
 import Text.ParserCombinators.Parsec
 import Utils
 
-data Token = Tok String SourcePos
+data Token = 
+  Id String SourcePos  |
+  Sep String SourcePos |
+  Op String SourcePos  |
+  Res String SourcePos
 
 instance Show Token where
   show = showTok
@@ -15,14 +20,29 @@ instance Show Token where
 instance Eq Token where
   (==) = tokEqual
   
-testTok :: String -> Token
-testTok s = Tok s (newPos "DUMMY" 0 0)
+isId (Id _ _) = True
+isId _ = False
+
+name (Id n _) = n
+name (Sep n _) = n
+name (Op n _) = n
+name (Res n _) = n
+
+pos (Id _ p) = p
+pos (Sep _ p) = p
+pos (Op _ p) = p
+pos (Res _ p) = p
+
+testId s = Id s (newPos "DUMMY" 0 0)
+testSep s = Sep s (newPos "DUMMY" 0 0)
+testOp s = Sep s (newPos "DUMMY" 0 0)
+testRes s = Res s (newPos "DUMMY" 0 0)
 
 showTok :: Token -> String
-showTok (Tok name _) = "<" ++ name ++ ">"
+showTok t = name t
 
 tokEqual :: Token -> Token -> Bool
-tokEqual (Tok s1 _) (Tok s2 _) = s1 == s2
+tokEqual t1 t2 = name t1 == name t2
 
 toTokens :: String -> Error [Token]
 toTokens str = case parse parseToks "LEXER" str of
@@ -31,21 +51,28 @@ toTokens str = case parse parseToks "LEXER" str of
 
 parseToks = endBy parseTok spaces
 
-parseTok = do
-  pos <- getPosition
-  tok <- try atomicLit
+parseTok = try atomicLit
          <|> try reservedWord
          <|> try separator
          <|> operator
-  return $ Tok tok pos
   
 atomicLit = do
+  pos <- getPosition
   firstChar <- lower
   rest <- many alphaNum
-  return (firstChar:rest)
+  return $ Id (firstChar:rest) pos
   
-reservedWord = try (string "AXIOMS:") <|> (string "HYPOTHESIS:")
+reservedWord = do
+  pos <- getPosition
+  name <- try (string "AXIOMS:") <|> (string "HYPOTHESIS:")
+  return $ Res name pos
 
-separator = choice $ map string ["(", ")"]
+separator = do
+  pos <- getPosition
+  name <- choice $ map string ["(", ")"]
+  return $ Sep name pos
 
-operator = choice $ map string ["~", "|", "&", "<->", "->"]
+operator = do
+  pos <- getPosition
+  name <- choice $ map string ["~", "|", "&", "<->", "->"]
+  return $ Op name pos
