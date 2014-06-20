@@ -4,7 +4,6 @@ module Proper.Clause(
 
 import Data.Set as S
 
-
 import Proper.Utils
 
 data Atom =
