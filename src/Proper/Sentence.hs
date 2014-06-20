@@ -8,6 +8,7 @@ module Proper.Sentence(
 
 import Data.Map as M
 
+import Proper.Clause
 import Proper.CNF
 import Proper.Utils
 

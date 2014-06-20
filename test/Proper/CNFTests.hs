@@ -1,5 +1,6 @@
 module Proper.CNFTests(allCNFTests) where
 
+import Proper.Clause
 import Proper.CNF
 import Proper.Sentence
 import Proper.TestUtils

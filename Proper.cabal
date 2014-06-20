@@ -17,7 +17,7 @@ cabal-version:       >=1.8
 library
   hs-source-dirs:	src
   build-depends:	base==4.5.*, containers
-  exposed-modules:	Proper.Sentence, Proper.CNF
+  exposed-modules:	Proper.Sentence, Proper.CNF, Proper.Clause
 
 executable Proper
   main-is:             Main.hs

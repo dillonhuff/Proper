@@ -1,5 +1,6 @@
 module Proper.SentenceTests(allSentenceTests) where
 
+import Proper.Clause
 import Proper.CNF
 import Proper.Sentence
 import Proper.TestUtils
