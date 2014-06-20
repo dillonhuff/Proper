@@ -1,4 +1,4 @@
-module Lexer(
+module Proper.Lexer(
   Token, name, pos,
   isId,
   toTokens,
@@ -6,7 +6,7 @@ module Lexer(
 
 import Text.Parsec.Pos
 import Text.ParserCombinators.Parsec
-import Utils
+import Proper.Utils
 
 data Token = 
   Id String SourcePos  |

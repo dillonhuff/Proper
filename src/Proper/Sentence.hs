@@ -1,4 +1,4 @@
-module Sentence(
+module Proper.Sentence(
   Sentence, checkTheorem,
   neg, con, dis, val, bic, imp,
   truthAssignment,
@@ -8,8 +8,8 @@ module Sentence(
 
 import Data.Map as M
 
-import CNF
-import Utils
+import Proper.CNF
+import Proper.Utils
 
 data Sentence =
   Val Name              |

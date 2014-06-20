@@ -1,4 +1,4 @@
-module CNF(
+module Proper.CNF(
   lit, nLit,
   CNF, cnf, mergeCNFFormulas,
   Clause, clause, concatClause,
@@ -8,7 +8,7 @@ module CNF(
 import Data.Map as M
 import Data.Set as S
 
-import Utils
+import Proper.Utils
 
 data Atom =
   Lit Name |

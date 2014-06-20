@@ -1,13 +1,13 @@
-module Parser(
+module Proper.Parser(
   parseFormula,
   parseTheoremToks) where
 
-import Lexer
-import Sentence
+import Proper.Lexer
+import Proper.Sentence
 import Text.Parsec.Expr
 import Text.Parsec.Pos
 import Text.Parsec.Prim
-import Utils
+import Proper.Utils
 
 parseTheoremToks toks = case parse parseTheorem "PARSER" toks of
   Left err -> Failed $ show err

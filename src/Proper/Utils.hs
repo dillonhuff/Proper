@@ -1,4 +1,4 @@
-module Utils(
+module Proper.Utils(
   Name,
   Error(..), extractValue) where
 

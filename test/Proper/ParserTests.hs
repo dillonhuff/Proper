@@ -1,10 +1,10 @@
-module ParserTests(allParserTests) where
+module Proper.ParserTests(allParserTests) where
 
-import Lexer
-import Parser
-import Sentence
-import TestUtils
-import Utils
+import Proper.Lexer
+import Proper.Parser
+import Proper.Sentence
+import Proper.TestUtils
+import Proper.Utils
 
 allParserTests = do
   testParseFormula

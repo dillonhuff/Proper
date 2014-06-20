@@ -1,8 +1,8 @@
-module LexerTests(allLexerTests) where
+module Proper.LexerTests(allLexerTests) where
 
-import Lexer
-import TestUtils
-import Utils
+import Proper.Lexer
+import Proper.TestUtils
+import Proper.Utils
 
 allLexerTests = do
   testLexerOneToken

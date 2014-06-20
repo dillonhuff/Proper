@@ -1,8 +1,8 @@
-module CNFTests(allCNFTests) where
+module Proper.CNFTests(allCNFTests) where
 
-import CNF
-import Sentence
-import TestUtils
+import Proper.CNF
+import Proper.Sentence
+import Proper.TestUtils
 
 allCNFTests = do
   testNaiveSAT

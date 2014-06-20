@@ -1,8 +1,8 @@
-module SentenceTests(allSentenceTests) where
+module Proper.SentenceTests(allSentenceTests) where
 
-import CNF
-import Sentence
-import TestUtils
+import Proper.CNF
+import Proper.Sentence
+import Proper.TestUtils
 
 allSentenceTests = do
   testSimpleEval
