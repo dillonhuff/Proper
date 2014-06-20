@@ -8,24 +8,24 @@ import Data.Set as S
 import Proper.Clause
 import Proper.Utils
 
-type CNF = Set Clause
+type CNF c = Set (Clause c)
   
-cnf :: [Clause] -> CNF
+cnf :: (Ord c) => [Clause c] -> CNF c
 cnf clauses = S.fromList clauses
 
-mergeCNFFormulas :: [CNF] -> CNF
+mergeCNFFormulas :: (Ord c) => [CNF c] -> CNF c
 mergeCNFFormulas formulas = S.foldl S.union S.empty (S.fromList formulas)
 
-literals :: CNF -> Set Atom
+literals :: (Ord c) => CNF c -> Set (Atom c)
 literals formula = S.foldl S.union S.empty (S.map (S.map literal) formula)
 
-naiveSAT :: CNF -> Bool
+naiveSAT :: (Ord c) => CNF c -> Bool
 naiveSAT formula = nSat simplifiedFormula allLits
   where
     simplifiedFormula = unitClauseSimplify formula
     allLits = literals simplifiedFormula
     
-nSat :: CNF -> Set Atom -> Bool
+nSat :: (Ord c) => CNF c -> Set (Atom c) -> Bool
 nSat formula lits = case S.member S.empty formula of
   True -> False
   False -> case S.size formula of
@@ -39,12 +39,12 @@ nSat formula lits = case S.member S.empty formula of
       nextFormula = unitClauseSimplify (S.insert unitClause formula)
       nextFormulaNeg = unitClauseSimplify (S.insert unitNegClause formula)
 
-unitClauseSimplify :: CNF -> CNF
+unitClauseSimplify :: (Ord c) => CNF c -> CNF c
 unitClauseSimplify formula = S.foldl removeUnitClause formula unitClauses
   where
     unitClauses = S.filter (\s -> S.size s == 1) formula
 
-removeUnitClause :: CNF -> Clause -> CNF
+removeUnitClause :: (Ord c) => CNF c -> Clause c -> CNF c
 removeUnitClause formula c = remainingClauses
   where
     elemC = S.findMin c

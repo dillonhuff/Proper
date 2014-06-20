@@ -12,20 +12,20 @@ import Proper.Clause
 import Proper.CNF
 import Proper.Utils
 
-data Sentence =
-  Val Name              |
-  Neg Sentence          |
-  Con Sentence Sentence |
-  Dis Sentence Sentence |
-  Bic Sentence Sentence |
-  Imp Sentence Sentence
+data Sentence s =
+  Val s                     |
+  Neg (Sentence s)            |
+  Con (Sentence s) (Sentence s) |
+  Dis (Sentence s) (Sentence s) |
+  Bic (Sentence s) (Sentence s) |
+  Imp (Sentence s) (Sentence s)
   deriving (Eq, Ord)
 
-instance Show Sentence where
+instance Show s => Show (Sentence s) where
   show = showSent
   
-showSent :: Sentence -> String
-showSent (Val name) = name
+showSent :: (Show s) => (Sentence s) -> String
+showSent (Val name) = show name
 showSent (Neg s) = "~(" ++ show s ++ ")"
 showSent (Con s1 s2) = "(" ++ show s1 ++ " & " ++ show s2 ++ ")"
 showSent (Dis s1 s2) = "(" ++ show s1 ++ " | " ++ show s2 ++ ")"
@@ -39,7 +39,7 @@ bic s1 s2 = Bic s1 s2
 imp s1 s2 = Imp s1 s2
 val name = Val name
 
-constants :: Sentence -> [Sentence]
+constants :: Sentence s -> [Sentence s]
 constants (Val n) = [(Val n)]
 constants (Neg s) = constants s
 constants (Con s1 s2) = constants s1 ++ constants s2
@@ -47,19 +47,19 @@ constants (Dis s1 s2) = constants s1 ++ constants s2
 constants (Bic s1 s2) = constants s1 ++ constants s2
 constants (Imp s1 s2) = constants s1 ++ constants s2
 
-type TruthAssignment = Map Sentence Bool
+type TruthAssignment s = Map (Sentence s) Bool
 
-truthVal :: Sentence -> TruthAssignment -> Bool
+truthVal :: (Ord s, Show s) => Sentence s -> TruthAssignment s -> Bool
 truthVal s tt = case M.lookup s tt of
   Just val -> val
   Nothing -> error $ "Sentence not in truth table " ++ show s
 
-truthAssignment :: [Name] -> [Bool] -> TruthAssignment
+truthAssignment :: (Ord s) => [s] -> [Bool] -> TruthAssignment s
 truthAssignment constNames constVals = M.fromList $ zip consts constVals
   where
     consts = Prelude.map val constNames
 
-evalSentence :: TruthAssignment -> Sentence -> Bool
+evalSentence :: (Ord s, Show s) => TruthAssignment s -> Sentence s -> Bool
 evalSentence a (Neg s) = not $ evalSentence a s
 evalSentence a (Con s1 s2) = (evalSentence a s1) && (evalSentence a s2)
 evalSentence a (Dis s1 s2) = (evalSentence a s1) || (evalSentence a s2)
@@ -73,21 +73,21 @@ evalSentence a (Bic s1 s2) = (s1Eval && s2Eval) || ((not s1Eval) && (not s2Eval)
     s2Eval = evalSentence a s2
 evalSentence a constant = truthVal constant a
   
-type TruthTable = [TruthAssignment]
+type TruthTable s = [TruthAssignment s]
 
-containsSentence :: Sentence -> TruthTable -> Bool
+containsSentence :: (Ord s) => Sentence s -> TruthTable s -> Bool
 containsSentence s [] = False
 containsSentence s tt = M.member s (head tt)
 
-truthTable :: [Sentence] -> TruthTable
+truthTable :: (Ord s, Show s) => [Sentence s] -> TruthTable s
 truthTable sents = Prelude.foldl addSentence [] sents
 
-addSentence :: TruthTable -> Sentence -> TruthTable
+addSentence :: (Ord s, Show s) => TruthTable s -> Sentence s -> TruthTable s
 addSentence tt s = if (containsSentence s tt)
   then tt
   else addNewSentence tt s
 
-addNewSentence :: TruthTable -> Sentence -> TruthTable
+addNewSentence :: (Ord s, Show s) => TruthTable s -> Sentence s -> TruthTable s
 addNewSentence [] c@(Val n) = [truthAssignment [n] [True], truthAssignment [n] [False]]
 addNewSentence tt c@(Val n) = ttFalse ++ ttTrue
  where
@@ -95,22 +95,22 @@ addNewSentence tt c@(Val n) = ttFalse ++ ttTrue
    ttTrue = Prelude.map (\ta -> M.insert c True ta) tt
 addNewSentence tt s = Prelude.map (addCompoundSentence s) tt
 
-addCompoundSentence :: Sentence -> TruthAssignment -> TruthAssignment
+addCompoundSentence ::(Ord s, Show s) => Sentence s -> TruthAssignment s -> TruthAssignment s
 addCompoundSentence s ta = insert s sval ta
   where
     sval = evalSentence ta s
 
-truthTableForSentence :: Sentence -> TruthTable
+truthTableForSentence :: (Ord s, Show s) => Sentence s -> TruthTable s
 truthTableForSentence s = truthTable $ (constants s) ++ [s]
                           
-isValidByTruthTable :: Sentence -> Bool
+isValidByTruthTable :: (Ord s, Show s) => Sentence s -> Bool
 isValidByTruthTable s = and sTruthVals
   where
     sTruthTable = truthTableForSentence s
     sTruthVals = Prelude.map (truthVal s) sTruthTable
     
 -- Format conversion functions
-toCNF :: Sentence -> CNF
+toCNF :: (Ord s, Show s) => Sentence s -> CNF s
 toCNF = cnf .
         cnfClauses .
         distributeDisjunction .
@@ -118,17 +118,17 @@ toCNF = cnf .
         removeImplication .
         removeBiconditional
 
-cnfClauses :: Sentence -> [Clause]
+cnfClauses :: (Ord s, Show s) => Sentence s -> [Clause s]
 cnfClauses (Con s1 s2) = cnfClauses s1 ++ cnfClauses s2
 cnfClauses s = [disjunctiveClause s]
 
-disjunctiveClause :: Sentence -> Clause
+disjunctiveClause :: (Ord s, Show s) => Sentence s -> Clause s
 disjunctiveClause (Dis s1 s2) = concatClause (disjunctiveClause s1) (disjunctiveClause s2)
 disjunctiveClause (Val name) = clause [lit name]
 disjunctiveClause (Neg (Val name)) = clause [nLit name]
 disjunctiveClause s = error $ "Disjunctive clause contains " ++ show s
 
-removeImplication :: Sentence -> Sentence
+removeImplication :: Sentence s -> Sentence s
 removeImplication (Neg s) = Neg $ removeImplication s
 removeImplication (Con s1 s2) = Con (removeImplication s1) (removeImplication s2)
 removeImplication (Dis s1 s2) = Dis (removeImplication s1) (removeImplication s2)
@@ -138,7 +138,7 @@ removeImplication (Imp s1 s2) = Dis (Neg p) q
     q = removeImplication s2
 removeImplication s = s
 
-removeBiconditional :: Sentence -> Sentence
+removeBiconditional :: Sentence s -> Sentence s
 removeBiconditional (Neg s) = Neg $ removeBiconditional s
 removeBiconditional (Con s1 s2) = Con (removeBiconditional s1) (removeBiconditional s2)
 removeBiconditional (Dis s1 s2) = Dis (removeBiconditional s1) (removeBiconditional s2)
@@ -151,7 +151,7 @@ removeBiconditional (Bic s1 s2) = Con noBic1 noBic2
     q = removeBiconditional s2
 removeBiconditional (Val name) = (Val name)
 
-pushNegation :: Sentence -> Sentence
+pushNegation :: Sentence s -> Sentence s
 pushNegation (Neg (Neg s)) = pushNegation s
 pushNegation (Neg (Con s1 s2)) = Dis (pushNegation (Neg s1)) (pushNegation (Neg s2))
 pushNegation (Neg (Dis s1 s2)) = Con (pushNegation (Neg s1)) (pushNegation (Neg s2))
@@ -159,7 +159,7 @@ pushNegation (Con s1 s2) = Con (pushNegation s1) (pushNegation s2)
 pushNegation (Dis s1 s2) = Dis (pushNegation s1) (pushNegation s2)
 pushNegation s = s
 
-distributeDisjunction :: Sentence -> Sentence
+distributeDisjunction :: Sentence s -> Sentence s
 distributeDisjunction (Con p q) = Con (distributeDisjunction p) (distributeDisjunction q)
 distributeDisjunction (Dis p (Con q r)) = Con pdq pdr
  where
@@ -180,22 +180,22 @@ distributeDisjunction (Dis p q) = case pd of
 distributeDisjunction s = s
 
 -- Theorem code
-data Theorem = Thm [Sentence] Sentence
+data Theorem s = Thm [Sentence s] (Sentence s)
                deriving (Eq)
                         
-instance Show Theorem where
+instance Show s => Show (Theorem s) where
   show = showThm
   
-showThm :: Theorem -> String
+showThm :: (Show s) => Theorem s -> String
 showThm (Thm axioms hyp) = "THEOREM\n" ++ axiomStr ++ "\n|=\n\n" ++ hypString
   where
     axiomStr = Prelude.concat $ Prelude.map (\a -> (show a) ++ "\n") axioms
     hypString = show hyp
 
-theorem :: [Sentence] -> Sentence -> Theorem
+theorem :: [Sentence s] -> Sentence s -> Theorem s
 theorem axioms hypothesis = Thm axioms hypothesis
 
-checkTheorem :: Theorem -> Bool
+checkTheorem :: (Ord s, Show s) => Theorem s -> Bool
 checkTheorem (Thm axioms hypothesis) = not $ naiveSAT cnfFormNegThm
   where
     cnfAxioms = Prelude.map toCNF axioms

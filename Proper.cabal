@@ -7,8 +7,8 @@ synopsis:	     An implementation of propositional logic in Haskell
 -- description:         
 license:  		BSD3           
 license-file:        LICENSE
--- author:              
--- maintainer:          
+author:		     Dillon Huff              
+maintainer:	     Dillon Huff          
 -- copyright:           
 -- category:            
 build-type:          Simple

@@ -6,26 +6,26 @@ import Data.Set as S
 
 import Proper.Utils
 
-data Atom =
-  Lit Name |
-  NLit Name
+data Atom a =
+  Lit a |
+  NLit a
   deriving (Eq, Ord, Show)
   
-negation :: Atom -> Atom
+negation :: Atom a -> Atom a
 negation (Lit n) = NLit n
 negation (NLit n) = Lit n
 
-literal :: Atom -> Atom
+literal :: Atom a -> Atom a
 literal (Lit n) = Lit n
 literal (NLit n) = Lit n
 
 lit name = Lit name
 nLit name = NLit name
 
-type Clause = Set Atom
+type Clause c = Set (Atom c)
 
-concatClause :: Clause -> Clause -> Clause
+concatClause :: (Ord c) => Clause c -> Clause c -> Clause c
 concatClause c1 c2 = S.union c1 c2
 
-clause :: [Atom] -> Clause
+clause :: (Ord a) => [Atom a] -> Clause a
 clause atoms = S.fromList atoms
