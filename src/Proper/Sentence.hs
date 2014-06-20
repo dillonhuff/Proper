@@ -13,8 +13,8 @@ import Proper.CNF
 import Proper.Utils
 
 data Sentence s =
-  Val s                     |
-  Neg (Sentence s)            |
+  Val s                         |
+  Neg (Sentence s)              |
   Con (Sentence s) (Sentence s) |
   Dis (Sentence s) (Sentence s) |
   Bic (Sentence s) (Sentence s) |
