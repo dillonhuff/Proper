@@ -5,8 +5,8 @@ name:                Proper
 version:             0.1.0.0
 synopsis:	     An implementation of propositional logic in Haskell            
 -- description:         
--- license:             
--- license-file:        LICENSE
+license:  		BSD3           
+license-file:        LICENSE
 -- author:              
 -- maintainer:          
 -- copyright:           
