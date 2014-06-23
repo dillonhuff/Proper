@@ -6,6 +6,8 @@ module Proper.Sentence(
   isValidByTruthTable,
   toCNF, theorem) where
 
+import Data.Foldable
+import Data.Monoid
 import Data.Map as M
 
 import Proper.Clause
@@ -21,6 +23,22 @@ data Sentence s =
   Imp (Sentence s) (Sentence s)
   deriving (Eq, Ord)
 
+instance Functor Sentence where
+  fmap f (Val v) = Val (f v)
+  fmap f (Neg s) = Neg (fmap f s)
+  fmap f (Con s1 s2) = Con (fmap f s1) (fmap f s2)
+  fmap f (Dis s1 s2) = Dis (fmap f s1) (fmap f s2)
+  fmap f (Bic s1 s2) = Bic (fmap f s1) (fmap f s2)
+  fmap f (Imp s1 s2) = Imp (fmap f s1) (fmap f s2)
+
+instance Foldable Sentence where
+  foldMap f (Val v) = f v
+  foldMap f (Neg s) = foldMap f s
+  foldMap f (Con s1 s2) = mappend (foldMap f s1) (foldMap f s2)
+  foldMap f (Dis s1 s2) = mappend (foldMap f s1) (foldMap f s2)
+  foldMap f (Imp s1 s2) = mappend (foldMap f s1) (foldMap f s2)
+  foldMap f (Bic s1 s2) = mappend (foldMap f s1) (foldMap f s2)
+  
 instance Show s => Show (Sentence s) where
   show = showSent
   
@@ -39,13 +57,11 @@ bic s1 s2 = Bic s1 s2
 imp s1 s2 = Imp s1 s2
 val name = Val name
 
+constantsF :: Sentence s -> [Sentence s]
+constantsF s = foldMap (\n -> [Val n]) s
+
 constants :: Sentence s -> [Sentence s]
-constants (Val n) = [(Val n)]
-constants (Neg s) = constants s
-constants (Con s1 s2) = constants s1 ++ constants s2
-constants (Dis s1 s2) = constants s1 ++ constants s2
-constants (Bic s1 s2) = constants s1 ++ constants s2
-constants (Imp s1 s2) = constants s1 ++ constants s2
+constants s = foldMap (\n -> [Val n]) s
 
 type TruthAssignment s = Map (Sentence s) Bool
 
@@ -104,7 +120,7 @@ truthTableForSentence :: (Ord s, Show s) => Sentence s -> TruthTable s
 truthTableForSentence s = truthTable $ (constants s) ++ [s]
                           
 isValidByTruthTable :: (Ord s, Show s) => Sentence s -> Bool
-isValidByTruthTable s = and sTruthVals
+isValidByTruthTable s = Prelude.and sTruthVals
   where
     sTruthTable = truthTableForSentence s
     sTruthVals = Prelude.map (truthVal s) sTruthTable

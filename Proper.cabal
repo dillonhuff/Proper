@@ -8,7 +8,8 @@ synopsis:	     An implementation of propositional logic in Haskell
 license:  		BSD3           
 license-file:        LICENSE
 author:		     Dillon Huff              
-maintainer:	     Dillon Huff          
+maintainer:	     Dillon Huff
+homepage:	     https://github.com/dillonhuff/Proper
 -- copyright:           
 -- category:            
 build-type:          Simple
