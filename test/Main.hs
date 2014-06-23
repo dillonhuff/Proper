@@ -1,5 +1,6 @@
 module Main(main) where
 
+import Proper.BDDTests
 import Proper.CNFTests
 import Proper.LexerTests
 import Proper.ParserTests
@@ -10,3 +11,4 @@ main = do
   allCNFTests
   allLexerTests
   allParserTests
+  allBDDTests

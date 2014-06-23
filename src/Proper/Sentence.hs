@@ -4,12 +4,13 @@ module Proper.Sentence(
   truthAssignment,
   evalSentence,
   isValidByTruthTable,
-  toCNF, theorem) where
+  toCNF, theorem,
+  bddCheckTaut) where
 
 import Data.Foldable
 import Data.Monoid
 import Data.Map as M
-
+import Proper.BDD
 import Proper.Clause
 import Proper.CNF
 import Proper.Utils
@@ -217,3 +218,16 @@ checkTheorem (Thm axioms hypothesis) = not $ naiveSAT cnfFormNegThm
     cnfAxioms = Prelude.map toCNF axioms
     cnfNotHypothesis = toCNF (neg hypothesis)
     cnfFormNegThm = mergeCNFFormulas (cnfNotHypothesis:cnfAxioms)
+    
+-- BDD conversion code
+    
+bddCheckTaut :: (Ord s) => Sentence s -> Bool
+bddCheckTaut sent = isTaut (toBDD sent)
+
+toBDD :: (Ord s) => Sentence s -> BDD s
+toBDD (Val n) = singletonBDD n
+toBDD (Neg sent) = negBDD (toBDD sent)
+toBDD (Dis f1 f2) = disBDD (toBDD f1) (toBDD f2)
+toBDD (Con f1 f2) = conBDD (toBDD f1) (toBDD f2)
+toBDD (Imp f1 f2) = impBDD (toBDD f1) (toBDD f2)
+toBDD (Bic f1 f2) = bicBDD (toBDD f1) (toBDD f2)
