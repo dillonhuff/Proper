@@ -1,0 +1,7 @@
+AXIOMS:
+a <-> f
+~c -> (a & l)
+~(~(~c))
+
+HYPOTHESIS:
+~(l | ~f) <-> ~l & f
