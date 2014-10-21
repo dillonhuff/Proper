@@ -213,7 +213,9 @@ theorem :: [Sentence s] -> Sentence s -> Theorem s
 theorem axioms hypothesis = Thm axioms hypothesis
 
 checkTheorem :: (Ord s, Show s) => Theorem s -> Bool
-checkTheorem (Thm axioms hypothesis) = not $ naiveSAT cnfFormNegThm
+checkTheorem (Thm axioms hypothesis) = case naiveSAT cnfFormNegThm of
+  Just asg -> False
+  Nothing -> True
   where
     cnfAxioms = Prelude.map toCNF axioms
     cnfNotHypothesis = toCNF (neg hypothesis)

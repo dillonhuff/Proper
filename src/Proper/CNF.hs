@@ -1,13 +1,15 @@
 module Proper.CNF(
-  CNF, cnf, mergeCNFFormulas,
-  naiveSAT)
-       where
+  CNF, SatisfyingAssignment,
+  cnf, mergeCNFFormulas,
+  naiveSAT, naiveSATBool) where
 
+import Data.Generics.Aliases
 import Data.Map as M
 import Data.Set as S
 import Proper.Clause
 import Proper.Utils
 
+type SatisfyingAssignment a = Map (Atom a) Bool
 type CNF c = Set (Clause c)
   
 cnf :: (Ord c) => [Clause c] -> CNF c
@@ -19,19 +21,35 @@ mergeCNFFormulas formulas = S.foldl S.union S.empty (S.fromList formulas)
 literals :: (Ord c) => CNF c -> Set (Atom c)
 literals formula = S.foldl S.union S.empty (S.map (S.map literal) formula)
 
-naiveSAT :: (Ord c) => CNF c -> Bool
+naiveSATBool :: (Ord c) => CNF c -> Bool
+naiveSATBool formula = case naiveSAT formula of
+  Just asg -> True
+  Nothing -> False
+  
+-- A very naive implementation of DPLL
+naiveSAT :: (Ord c) => CNF c -> Maybe (SatisfyingAssignment c)
 naiveSAT formula = nSat simplifiedFormula allLits
   where
     simplifiedFormula = unitClauseSimplify formula
     allLits = literals simplifiedFormula
     
-nSat :: (Ord c) => CNF c -> Set (Atom c) -> Bool
+nSat :: (Ord c) => CNF c -> Set (Atom c) -> Maybe (SatisfyingAssignment c)
 nSat formula lits = case S.member S.empty formula of
-  True -> False
+  True -> Nothing
   False -> case S.size formula of
-    0 -> True
-    _ -> (nSat nextFormula nextLits) || (nSat nextFormulaNeg nextLits)
+    0 -> Just $ M.empty
+    _ -> orElse (nSat nextFormula nextLits) (nSat nextFormulaNeg nextLits)
     where
+      (simplifiedFormula, unitAssignments, newLits) = simplifyUnitClauses formula lits
+      nextLit = S.findMin newLits
+      nextFormula = S.insert (clause [nextLit]) simplifiedFormula
+      nextFormulaNeg = S.insert (clause [negation nextLit]) simplifiedFormula
+
+simplifyUnitClauses :: CNF c ->
+                       Set (Atom c) ->
+                       (CNF c, SimplifyingAssignment c, Set (Atom c))
+simplifyUnitClauses formula lits = 
+      {-
       nextLit = S.findMin lits
       nextLits = S.delete nextLit lits
       unitClause = clause [nextLit]
@@ -50,3 +68,4 @@ removeUnitClause formula c = remainingClauses
     elemC = S.findMin c
     removeNegC = S.map (S.delete (negation elemC)) formula
     remainingClauses = S.filter (\s -> (not $ S.member elemC s)) removeNegC
+-}

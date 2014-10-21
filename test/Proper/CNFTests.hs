@@ -10,7 +10,7 @@ allCNFTests = do
   testNaiveSATComplicated
   
 testNaiveSAT =
-  testFunction naiveSAT satCases
+  testFunction naiveSATBool satCases
   
 satCases =
   [(cnf $ [clause [lit "a"], clause [nLit "a"]], False),
@@ -24,7 +24,7 @@ satCases =
    (toCNF (neg (bic (val "c") (val "c"))), False)]
   
 testNaiveSATComplicated =
-  testFunction naiveSAT complicatedCases
+  testFunction naiveSATBool complicatedCases
   
 complicatedCases =
   [(toCNF (neg (bic (neg (con (val "p") (val "q"))) (dis (neg (val "p")) (neg (val "q"))))), False),
