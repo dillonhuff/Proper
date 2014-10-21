@@ -3,6 +3,7 @@ module Proper.CNF(
   cnf, mergeCNFFormulas,
   naiveSAT, naiveSATBool) where
 
+import Control.Monad
 import Data.Generics.Aliases
 import Data.List as L
 import Data.Map as M
@@ -34,16 +35,18 @@ naiveSAT formula = nSat formula allLits
     allLits = literals formula
     
 nSat :: (Ord c) => CNF c -> Set (Atom c) -> Maybe (SatisfyingAssignment c)
-nSat formula lits = case S.member S.empty formula of
+nSat formula lits = case S.member S.empty simplifiedFormula of
   True -> Nothing
-  False -> case S.size formula of
-    0 -> Just $ M.empty
-    _ -> orElse (nSat nextFormula nextLits) (nSat nextFormulaNeg nextLits)
-    where
-      (simplifiedFormula, unitAssignments, nextLits) = simplifyUnitClauses formula lits
-      nextLit = S.findMin nextLits
-      nextFormula = S.insert (clause [nextLit]) simplifiedFormula
-      nextFormulaNeg = S.insert (clause [negation nextLit]) simplifiedFormula
+  False -> case S.size simplifiedFormula of
+    0 -> Just unitAssignments
+    _ -> liftM (M.union unitAssignments) $ orElse nextAsg nextAsgNeg
+  where
+    (simplifiedFormula, unitAssignments, nextLits) = simplifyUnitClauses formula lits
+    nextLit = S.findMin nextLits
+    nextFormula = S.insert (clause [nextLit]) simplifiedFormula
+    nextFormulaNeg = S.insert (clause [negation nextLit]) simplifiedFormula
+    nextAsg = liftM (M.insert nextLit True) (nSat nextFormula nextLits)
+    nextAsgNeg = liftM (M.insert nextLit False) (nSat nextFormulaNeg nextLits)
 
 simplifyUnitClauses :: (Ord c) =>
                        CNF c ->
@@ -57,18 +60,6 @@ simplifyUnitClauses formula lits = (newFormula, unitAssignments, remainingLitera
     unitAssignments = M.fromList $ L.zip litList $ L.map assignTruthVal litList
     newFormula = S.foldl removeUnitClause formula unitClauses
     remainingLiterals = S.difference lits unitLiterals
-      {-
-      nextLit = S.findMin lits
-      nextLits = S.delete nextLit lits
-      unitClause = clause [nextLit]
-      unitNegClause = clause [negation nextLit]
-      nextFormula = unitClauseSimplify (S.insert unitClause formula)
-      nextFormulaNeg = unitClauseSimplify (S.insert unitNegClause formula)
-
-unitClauseSimplify :: (Ord c) => CNF c -> CNF c
-unitClauseSimplify formula = S.foldl removeUnitClause formula unitClauses
-  where
-    unitClauses = S.filter (\s -> S.size s == 1) formula-}
 
 removeUnitClause :: (Ord c) => CNF c -> Clause c -> CNF c
 removeUnitClause formula c = remainingClauses

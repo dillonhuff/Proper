@@ -1,5 +1,7 @@
 module Proper.CNFTests(allCNFTests) where
 
+import Data.Map as M
+
 import Proper.Clause
 import Proper.CNF
 import Proper.Sentence
@@ -8,6 +10,22 @@ import Proper.TestUtils
 allCNFTests = do
   testNaiveSAT
   testNaiveSATComplicated
+  testNaiveSATAssignments
+
+testNaiveSATAssignments =
+  testFunction naiveSAT satAssignCases
+
+satAssignCases =
+  [(cnf $ [clause [lit "a"], clause [nLit "a"]], Just $ M.fromList [(lit "a", True)]),
+   (cnf $ [clause [lit "p"]], Just $ M.fromList [(lit "p", True)]),
+   (cnf $ [clause [nLit "a", lit "p"]], Just $ M.fromList [(nLit "a", True)]),
+   (cnf $ [clause [nLit "p"],
+           clause [lit "p", nLit "s"],
+           clause [lit "p"]], Nothing),
+   (toCNF (imp (val "a") (val "a")), Just $ M.fromList [(lit "a", True)]),
+   (toCNF (bic (val "c") (val "d")), Just $ M.fromList [(lit "c", True), (lit "d", True)]),
+   (toCNF (neg (bic (val "c") (val "c"))), Nothing)]
+
   
 testNaiveSAT =
   testFunction naiveSATBool satCases
