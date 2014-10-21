@@ -1,6 +1,7 @@
 module Proper.Clause(
   Atom, negation, lit, nLit, literal,
-  Clause, clause, concatClause) where
+  Clause, clause, concatClause,
+  assignTruthVal) where
 
 import Data.Set as S
 
@@ -10,6 +11,10 @@ data Atom a =
   Lit a |
   NLit a
   deriving (Eq, Ord, Show)
+
+assignTruthVal :: Atom l -> Bool
+assignTruthVal (Lit _) = True
+assignTruthVal (NLit _) = False
   
 negation :: Atom a -> Atom a
 negation (Lit n) = NLit n

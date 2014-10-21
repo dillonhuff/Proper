@@ -4,6 +4,7 @@ module Proper.CNF(
   naiveSAT, naiveSATBool) where
 
 import Data.Generics.Aliases
+import Data.List as L
 import Data.Map as M
 import Data.Set as S
 import Proper.Clause
@@ -28,10 +29,9 @@ naiveSATBool formula = case naiveSAT formula of
   
 -- A very naive implementation of DPLL
 naiveSAT :: (Ord c) => CNF c -> Maybe (SatisfyingAssignment c)
-naiveSAT formula = nSat simplifiedFormula allLits
+naiveSAT formula = nSat formula allLits
   where
-    simplifiedFormula = unitClauseSimplify formula
-    allLits = literals simplifiedFormula
+    allLits = literals formula
     
 nSat :: (Ord c) => CNF c -> Set (Atom c) -> Maybe (SatisfyingAssignment c)
 nSat formula lits = case S.member S.empty formula of
@@ -40,15 +40,23 @@ nSat formula lits = case S.member S.empty formula of
     0 -> Just $ M.empty
     _ -> orElse (nSat nextFormula nextLits) (nSat nextFormulaNeg nextLits)
     where
-      (simplifiedFormula, unitAssignments, newLits) = simplifyUnitClauses formula lits
-      nextLit = S.findMin newLits
+      (simplifiedFormula, unitAssignments, nextLits) = simplifyUnitClauses formula lits
+      nextLit = S.findMin nextLits
       nextFormula = S.insert (clause [nextLit]) simplifiedFormula
       nextFormulaNeg = S.insert (clause [negation nextLit]) simplifiedFormula
 
-simplifyUnitClauses :: CNF c ->
+simplifyUnitClauses :: (Ord c) =>
+                       CNF c ->
                        Set (Atom c) ->
-                       (CNF c, SimplifyingAssignment c, Set (Atom c))
-simplifyUnitClauses formula lits = 
+                       (CNF c, SatisfyingAssignment c, Set (Atom c))
+simplifyUnitClauses formula lits = (newFormula, unitAssignments, remainingLiterals)
+  where
+    unitClauses = S.filter (\s -> S.size s == 1) formula
+    unitLiterals = literals unitClauses
+    litList = S.toList unitLiterals
+    unitAssignments = M.fromList $ L.zip litList $ L.map assignTruthVal litList
+    newFormula = S.foldl removeUnitClause formula unitClauses
+    remainingLiterals = S.difference lits unitLiterals
       {-
       nextLit = S.findMin lits
       nextLits = S.delete nextLit lits
@@ -60,7 +68,7 @@ simplifyUnitClauses formula lits =
 unitClauseSimplify :: (Ord c) => CNF c -> CNF c
 unitClauseSimplify formula = S.foldl removeUnitClause formula unitClauses
   where
-    unitClauses = S.filter (\s -> S.size s == 1) formula
+    unitClauses = S.filter (\s -> S.size s == 1) formula-}
 
 removeUnitClause :: (Ord c) => CNF c -> Clause c -> CNF c
 removeUnitClause formula c = remainingClauses
@@ -68,4 +76,3 @@ removeUnitClause formula c = remainingClauses
     elemC = S.findMin c
     removeNegC = S.map (S.delete (negation elemC)) formula
     remainingClauses = S.filter (\s -> (not $ S.member elemC s)) removeNegC
--}
