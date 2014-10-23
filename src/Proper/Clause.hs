@@ -1,5 +1,5 @@
 module Proper.Clause(
-  Atom, negation, lit, nLit, literal,
+  Atom, atom, negation, lit, nLit, literal,
   Clause, clause, concatClause,
   assignTruthVal) where
 
@@ -15,7 +15,7 @@ data Atom a =
 assignTruthVal :: Atom l -> Bool
 assignTruthVal (Lit _) = True
 assignTruthVal (NLit _) = False
-  
+
 negation :: Atom a -> Atom a
 negation (Lit n) = NLit n
 negation (NLit n) = Lit n
@@ -23,6 +23,9 @@ negation (NLit n) = Lit n
 literal :: Atom a -> Atom a
 literal (Lit n) = Lit n
 literal (NLit n) = Lit n
+
+atom (Lit n) = n
+atom (NLit n) = n
 
 lit name = Lit name
 nLit name = NLit name

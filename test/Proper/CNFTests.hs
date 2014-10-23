@@ -16,14 +16,15 @@ testNaiveSATAssignments =
   testFunction naiveSAT satAssignCases
 
 satAssignCases =
-  [(cnf $ [clause [lit "a"], clause [nLit "a"]], Just $ M.fromList [(lit "a", True)]),
-   (cnf $ [clause [lit "p"]], Just $ M.fromList [(lit "p", True)]),
-   (cnf $ [clause [nLit "a", lit "p"]], Just $ M.fromList [(nLit "a", True)]),
+  [(cnf $ [clause [lit "a"], clause [nLit "a"]], Nothing),
+   (cnf $ [clause [lit "a", nLit "a"]], Just $ M.fromList [("a", True)]),
+   (cnf $ [clause [lit "p"]], Just $ M.fromList [("p", True)]),
+   (cnf $ [clause [nLit "a", lit "p"]], Just $ M.fromList [("a", True), ("p", True)]),
    (cnf $ [clause [nLit "p"],
            clause [lit "p", nLit "s"],
            clause [lit "p"]], Nothing),
-   (toCNF (imp (val "a") (val "a")), Just $ M.fromList [(lit "a", True)]),
-   (toCNF (bic (val "c") (val "d")), Just $ M.fromList [(lit "c", True), (lit "d", True)]),
+   (toCNF (imp (val "a") (val "a")), Just $ M.fromList [("a", True)]),
+   (toCNF (bic (val "c") (val "d")), Just $ M.fromList [("c", True), ("d", True)]),
    (toCNF (neg (bic (val "c") (val "c"))), Nothing)]
 
   
