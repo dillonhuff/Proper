@@ -21,17 +21,17 @@ cabal-version:       >=1.8
 
 library
   hs-source-dirs:	src
-  build-depends:	base < 6, containers
-  exposed-modules:	Proper.Sentence, Proper.CNF, Proper.Clause, Proper.BDD
+  build-depends:	base < 6, containers, syb
+  exposed-modules:	Proper.Formula, Proper.CNF, Proper.Clause, Proper.BDD
 
 executable Proper
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       base < 6, containers, parsec
+  build-depends:       base < 6, containers, parsec, syb
   hs-source-dirs:      src
 
 executable Proper-tests
   main-is:             Main.hs
   -- other-modules:       
-  build-depends:       base < 6, HUnit, containers, parsec
+  build-depends:       base < 6, HUnit, containers, parsec, syb
   hs-source-dirs:      test, src

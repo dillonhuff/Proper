@@ -4,10 +4,10 @@ import Proper.BDDTests
 import Proper.CNFTests
 import Proper.LexerTests
 import Proper.ParserTests
-import Proper.SentenceTests
+import Proper.FormulaTests
 
 main = do
-  allSentenceTests
+  allFormulaTests
   allCNFTests
   allLexerTests
   allParserTests
