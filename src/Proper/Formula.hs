@@ -1,8 +1,8 @@
-module Proper.Sentence(
-  Sentence, checkTheorem,
+module Proper.Formula(
+  Formula, checkTheorem,
   neg, con, dis, val, bic, imp,
   truthAssignment,
-  evalSentence,
+  evalFormula,
   isValidByTruthTable,
   toCNF, theorem,
   bddCheckTaut) where
@@ -15,16 +15,16 @@ import Proper.Clause
 import Proper.CNF
 import Proper.Utils
 
-data Sentence s =
+data Formula s =
   Val s                         |
-  Neg (Sentence s)              |
-  Con (Sentence s) (Sentence s) |
-  Dis (Sentence s) (Sentence s) |
-  Bic (Sentence s) (Sentence s) |
-  Imp (Sentence s) (Sentence s)
+  Neg (Formula s)              |
+  Con (Formula s) (Formula s) |
+  Dis (Formula s) (Formula s) |
+  Bic (Formula s) (Formula s) |
+  Imp (Formula s) (Formula s)
   deriving (Eq, Ord)
 
-instance Functor Sentence where
+instance Functor Formula where
   fmap f (Val v) = Val (f v)
   fmap f (Neg s) = Neg (fmap f s)
   fmap f (Con s1 s2) = Con (fmap f s1) (fmap f s2)
@@ -32,7 +32,7 @@ instance Functor Sentence where
   fmap f (Bic s1 s2) = Bic (fmap f s1) (fmap f s2)
   fmap f (Imp s1 s2) = Imp (fmap f s1) (fmap f s2)
 
-instance Foldable Sentence where
+instance Foldable Formula where
   foldMap f (Val v) = f v
   foldMap f (Neg s) = foldMap f s
   foldMap f (Con s1 s2) = mappend (foldMap f s1) (foldMap f s2)
@@ -40,10 +40,10 @@ instance Foldable Sentence where
   foldMap f (Imp s1 s2) = mappend (foldMap f s1) (foldMap f s2)
   foldMap f (Bic s1 s2) = mappend (foldMap f s1) (foldMap f s2)
   
-instance Show s => Show (Sentence s) where
+instance Show s => Show (Formula s) where
   show = showSent
   
-showSent :: (Show s) => (Sentence s) -> String
+showSent :: (Show s) => (Formula s) -> String
 showSent (Val name) = show name
 showSent (Neg s) = "~(" ++ show s ++ ")"
 showSent (Con s1 s2) = "(" ++ show s1 ++ " & " ++ show s2 ++ ")"
@@ -58,76 +58,76 @@ bic s1 s2 = Bic s1 s2
 imp s1 s2 = Imp s1 s2
 val name = Val name
 
-constantsF :: Sentence s -> [Sentence s]
+constantsF :: Formula s -> [Formula s]
 constantsF s = foldMap (\n -> [Val n]) s
 
-constants :: Sentence s -> [Sentence s]
+constants :: Formula s -> [Formula s]
 constants s = foldMap (\n -> [Val n]) s
 
-type TruthAssignment s = Map (Sentence s) Bool
+type TruthAssignment s = Map (Formula s) Bool
 
-truthVal :: (Ord s, Show s) => Sentence s -> TruthAssignment s -> Bool
+truthVal :: (Ord s, Show s) => Formula s -> TruthAssignment s -> Bool
 truthVal s tt = case M.lookup s tt of
   Just val -> val
-  Nothing -> error $ "Sentence not in truth table " ++ show s
+  Nothing -> error $ "Formula not in truth table " ++ show s
 
 truthAssignment :: (Ord s) => [s] -> [Bool] -> TruthAssignment s
 truthAssignment constNames constVals = M.fromList $ zip consts constVals
   where
     consts = Prelude.map val constNames
 
-evalSentence :: (Ord s, Show s) => TruthAssignment s -> Sentence s -> Bool
-evalSentence a (Neg s) = not $ evalSentence a s
-evalSentence a (Con s1 s2) = (evalSentence a s1) && (evalSentence a s2)
-evalSentence a (Dis s1 s2) = (evalSentence a s1) || (evalSentence a s2)
-evalSentence a (Imp s1 s2) = (not s1Eval) || s2Eval
+evalFormula :: (Ord s, Show s) => TruthAssignment s -> Formula s -> Bool
+evalFormula a (Neg s) = not $ evalFormula a s
+evalFormula a (Con s1 s2) = (evalFormula a s1) && (evalFormula a s2)
+evalFormula a (Dis s1 s2) = (evalFormula a s1) || (evalFormula a s2)
+evalFormula a (Imp s1 s2) = (not s1Eval) || s2Eval
   where
-    s1Eval = evalSentence a s1
-    s2Eval = evalSentence a s2
-evalSentence a (Bic s1 s2) = (s1Eval && s2Eval) || ((not s1Eval) && (not s2Eval))
+    s1Eval = evalFormula a s1
+    s2Eval = evalFormula a s2
+evalFormula a (Bic s1 s2) = (s1Eval && s2Eval) || ((not s1Eval) && (not s2Eval))
   where
-    s1Eval = evalSentence a s1
-    s2Eval = evalSentence a s2
-evalSentence a constant = truthVal constant a
+    s1Eval = evalFormula a s1
+    s2Eval = evalFormula a s2
+evalFormula a constant = truthVal constant a
   
 type TruthTable s = [TruthAssignment s]
 
-containsSentence :: (Ord s) => Sentence s -> TruthTable s -> Bool
-containsSentence s [] = False
-containsSentence s tt = M.member s (head tt)
+containsFormula :: (Ord s) => Formula s -> TruthTable s -> Bool
+containsFormula s [] = False
+containsFormula s tt = M.member s (head tt)
 
-truthTable :: (Ord s, Show s) => [Sentence s] -> TruthTable s
-truthTable sents = Prelude.foldl addSentence [] sents
+truthTable :: (Ord s, Show s) => [Formula s] -> TruthTable s
+truthTable sents = Prelude.foldl addFormula [] sents
 
-addSentence :: (Ord s, Show s) => TruthTable s -> Sentence s -> TruthTable s
-addSentence tt s = if (containsSentence s tt)
+addFormula :: (Ord s, Show s) => TruthTable s -> Formula s -> TruthTable s
+addFormula tt s = if (containsFormula s tt)
   then tt
-  else addNewSentence tt s
+  else addNewFormula tt s
 
-addNewSentence :: (Ord s, Show s) => TruthTable s -> Sentence s -> TruthTable s
-addNewSentence [] c@(Val n) = [truthAssignment [n] [True], truthAssignment [n] [False]]
-addNewSentence tt c@(Val n) = ttFalse ++ ttTrue
+addNewFormula :: (Ord s, Show s) => TruthTable s -> Formula s -> TruthTable s
+addNewFormula [] c@(Val n) = [truthAssignment [n] [True], truthAssignment [n] [False]]
+addNewFormula tt c@(Val n) = ttFalse ++ ttTrue
  where
    ttFalse = Prelude.map (\ta -> M.insert c False ta) tt
    ttTrue = Prelude.map (\ta -> M.insert c True ta) tt
-addNewSentence tt s = Prelude.map (addCompoundSentence s) tt
+addNewFormula tt s = Prelude.map (addCompoundFormula s) tt
 
-addCompoundSentence ::(Ord s, Show s) => Sentence s -> TruthAssignment s -> TruthAssignment s
-addCompoundSentence s ta = insert s sval ta
+addCompoundFormula ::(Ord s, Show s) => Formula s -> TruthAssignment s -> TruthAssignment s
+addCompoundFormula s ta = insert s sval ta
   where
-    sval = evalSentence ta s
+    sval = evalFormula ta s
 
-truthTableForSentence :: (Ord s, Show s) => Sentence s -> TruthTable s
-truthTableForSentence s = truthTable $ (constants s) ++ [s]
+truthTableForFormula :: (Ord s, Show s) => Formula s -> TruthTable s
+truthTableForFormula s = truthTable $ (constants s) ++ [s]
                           
-isValidByTruthTable :: (Ord s, Show s) => Sentence s -> Bool
+isValidByTruthTable :: (Ord s, Show s) => Formula s -> Bool
 isValidByTruthTable s = Prelude.and sTruthVals
   where
-    sTruthTable = truthTableForSentence s
+    sTruthTable = truthTableForFormula s
     sTruthVals = Prelude.map (truthVal s) sTruthTable
     
 -- Format conversion functions
-toCNF :: (Ord s, Show s) => Sentence s -> CNF s
+toCNF :: (Ord s, Show s) => Formula s -> CNF s
 toCNF = cnf .
         cnfClauses .
         distributeDisjunction .
@@ -135,17 +135,17 @@ toCNF = cnf .
         removeImplication .
         removeBiconditional
 
-cnfClauses :: (Ord s, Show s) => Sentence s -> [Clause s]
+cnfClauses :: (Ord s, Show s) => Formula s -> [Clause s]
 cnfClauses (Con s1 s2) = cnfClauses s1 ++ cnfClauses s2
 cnfClauses s = [disjunctiveClause s]
 
-disjunctiveClause :: (Ord s, Show s) => Sentence s -> Clause s
+disjunctiveClause :: (Ord s, Show s) => Formula s -> Clause s
 disjunctiveClause (Dis s1 s2) = concatClause (disjunctiveClause s1) (disjunctiveClause s2)
 disjunctiveClause (Val name) = clause [lit name]
 disjunctiveClause (Neg (Val name)) = clause [nLit name]
 disjunctiveClause s = error $ "Disjunctive clause contains " ++ show s
 
-removeImplication :: Sentence s -> Sentence s
+removeImplication :: Formula s -> Formula s
 removeImplication (Neg s) = Neg $ removeImplication s
 removeImplication (Con s1 s2) = Con (removeImplication s1) (removeImplication s2)
 removeImplication (Dis s1 s2) = Dis (removeImplication s1) (removeImplication s2)
@@ -155,7 +155,7 @@ removeImplication (Imp s1 s2) = Dis (Neg p) q
     q = removeImplication s2
 removeImplication s = s
 
-removeBiconditional :: Sentence s -> Sentence s
+removeBiconditional :: Formula s -> Formula s
 removeBiconditional (Neg s) = Neg $ removeBiconditional s
 removeBiconditional (Con s1 s2) = Con (removeBiconditional s1) (removeBiconditional s2)
 removeBiconditional (Dis s1 s2) = Dis (removeBiconditional s1) (removeBiconditional s2)
@@ -168,7 +168,7 @@ removeBiconditional (Bic s1 s2) = Con noBic1 noBic2
     q = removeBiconditional s2
 removeBiconditional (Val name) = (Val name)
 
-pushNegation :: Sentence s -> Sentence s
+pushNegation :: Formula s -> Formula s
 pushNegation (Neg (Neg s)) = pushNegation s
 pushNegation (Neg (Con s1 s2)) = Dis (pushNegation (Neg s1)) (pushNegation (Neg s2))
 pushNegation (Neg (Dis s1 s2)) = Con (pushNegation (Neg s1)) (pushNegation (Neg s2))
@@ -176,7 +176,7 @@ pushNegation (Con s1 s2) = Con (pushNegation s1) (pushNegation s2)
 pushNegation (Dis s1 s2) = Dis (pushNegation s1) (pushNegation s2)
 pushNegation s = s
 
-distributeDisjunction :: Sentence s -> Sentence s
+distributeDisjunction :: Formula s -> Formula s
 distributeDisjunction (Con p q) = Con (distributeDisjunction p) (distributeDisjunction q)
 distributeDisjunction (Dis p (Con q r)) = Con pdq pdr
  where
@@ -197,7 +197,7 @@ distributeDisjunction (Dis p q) = case pd of
 distributeDisjunction s = s
 
 -- Theorem code
-data Theorem s = Thm [Sentence s] (Sentence s)
+data Theorem s = Thm [Formula s] (Formula s)
                deriving (Eq)
                         
 instance Show s => Show (Theorem s) where
@@ -209,7 +209,7 @@ showThm (Thm axioms hyp) = "THEOREM\n" ++ axiomStr ++ "\n|=\n\n" ++ hypString
     axiomStr = Prelude.concat $ Prelude.map (\a -> (show a) ++ "\n") axioms
     hypString = show hyp
 
-theorem :: [Sentence s] -> Sentence s -> Theorem s
+theorem :: [Formula s] -> Formula s -> Theorem s
 theorem axioms hypothesis = Thm axioms hypothesis
 
 checkTheorem :: (Ord s, Show s) => Theorem s -> Bool
@@ -223,10 +223,10 @@ checkTheorem (Thm axioms hypothesis) = case naiveSAT cnfFormNegThm of
     
 -- BDD conversion code
     
-bddCheckTaut :: (Ord s) => Sentence s -> Bool
+bddCheckTaut :: (Ord s) => Formula s -> Bool
 bddCheckTaut sent = isTaut (toBDD sent)
 
-toBDD :: (Ord s) => Sentence s -> BDD s
+toBDD :: (Ord s) => Formula s -> BDD s
 toBDD (Val n) = singletonBDD n
 toBDD (Neg sent) = negBDD (toBDD sent)
 toBDD (Dis f1 f2) = disBDD (toBDD f1) (toBDD f2)
