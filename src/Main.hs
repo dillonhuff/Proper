@@ -3,7 +3,7 @@ module Main(main) where
 import System.Environment
 import Proper.Lexer
 import Proper.Parser
-import Proper.Sentence
+import Proper.Formula
 import System.IO
 import Proper.Utils
 

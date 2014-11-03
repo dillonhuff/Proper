@@ -2,7 +2,7 @@ module Proper.ParserTests(allParserTests) where
 
 import Proper.Lexer
 import Proper.Parser
-import Proper.Sentence
+import Proper.Formula
 import Proper.TestUtils
 import Proper.Utils
 

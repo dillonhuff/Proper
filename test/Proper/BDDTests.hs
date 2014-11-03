@@ -1,7 +1,7 @@
 module Proper.BDDTests(allBDDTests) where
 
 import Proper.BDD
-import Proper.Sentence
+import Proper.Formula
 import Proper.TestUtils
 
 allBDDTests = do

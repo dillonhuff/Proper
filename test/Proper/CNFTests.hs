@@ -4,7 +4,7 @@ import Data.Map as M
 
 import Proper.Clause
 import Proper.CNF
-import Proper.Sentence
+import Proper.Formula
 import Proper.TestUtils
 
 allCNFTests = do

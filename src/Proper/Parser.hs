@@ -2,8 +2,8 @@ module Proper.Parser(
   parseFormula,
   parseTheoremToks) where
 
+import Proper.Formula
 import Proper.Lexer
-import Proper.Sentence
 import Text.Parsec.Expr
 import Text.Parsec.Pos
 import Text.Parsec.Prim
@@ -28,7 +28,7 @@ parseHypothesis = do
   hypothesis <- parseForm
   return hypothesis
 
-parseFormula :: [Token] -> Error (Sentence String)
+parseFormula :: [Token] -> Error (Formula String)
 parseFormula toks = case parse parseForm "PARSER" toks of
   Left err -> Failed $ show err
   Right formula -> Succeeded formula
@@ -54,7 +54,7 @@ parseParens e = do
   propTok ")"
   return expr
 
-parseNeg :: (Monad m) => ParsecT [Token] u m (Sentence s -> Sentence s)
+parseNeg :: (Monad m) => ParsecT [Token] u m (Formula s -> Formula s)
 parseNeg = do
   propTok "~"
   return $ neg
@@ -77,7 +77,7 @@ parseBic = do
   
 parseTerm = parseParens parseForm <|> parseLit
 
-parseLit :: (Monad m) => ParsecT [Token] u m (Sentence String)
+parseLit :: (Monad m) => ParsecT [Token] u m (Formula String)
 parseLit = do
   litTok <- literalTok
   return $ val (name litTok)
