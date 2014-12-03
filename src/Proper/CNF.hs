@@ -1,6 +1,6 @@
 module Proper.CNF(
   CNF, SatisfyingAssignment,
-  cnf, mergeCNFFormulas,
+  cnf, mergeCNFFormulas, addClause,
   naiveSAT, naiveSATBool) where
 
 import Control.Monad
@@ -16,6 +16,9 @@ type CNF c = Set (Clause c)
   
 cnf :: (Ord c) => [Clause c] -> CNF c
 cnf clauses = S.fromList clauses
+
+addClause :: (Ord c) => Clause c -> CNF c -> CNF c
+addClause toAdd cnfFormula = S.insert toAdd cnfFormula
 
 mergeCNFFormulas :: (Ord c) => [CNF c] -> CNF c
 mergeCNFFormulas formulas = S.foldl S.union S.empty (S.fromList formulas)

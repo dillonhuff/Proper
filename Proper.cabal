@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                Proper
-version:             0.5.2.0
+version:             0.5.2.2
 synopsis:	     An implementation of propositional logic in Haskell            
 description:         Proper is both an executable theorem prover for Propositional logic
 		     and a library for incorporating propositional logic into other Haskell
