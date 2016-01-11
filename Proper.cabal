@@ -23,15 +23,16 @@ library
   hs-source-dirs:	src
   build-depends:	base < 6, containers, syb
   exposed-modules:	Proper.Formula, Proper.CNF, Proper.Clause, Proper.BDD
+  other-modules:	Proper.Utils
 
 executable Proper
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:       Proper.Parser, Proper.Lexer
   build-depends:       base < 6, containers, parsec, syb
   hs-source-dirs:      src
 
 executable Proper-tests
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:       Proper.BDDTests, Proper.CNFTests, Proper.LexerTests, Proper.ParserTests, Proper.FormulaTests, Proper.TestUtils
   build-depends:       base < 6, HUnit, containers, parsec, syb
   hs-source-dirs:      test, src
