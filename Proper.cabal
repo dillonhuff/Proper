@@ -19,6 +19,10 @@ homepage:	     https://github.com/dillonhuff/Proper
 build-type:          Simple
 cabal-version:       >=1.8
 
+source-repository head
+  type:     git
+  location: https://github.com/dillonhuff/Proper.git
+
 library
   hs-source-dirs:	src
   build-depends:	base < 6, containers, syb
