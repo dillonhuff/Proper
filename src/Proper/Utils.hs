@@ -2,12 +2,22 @@ module Proper.Utils(
   Name,
   Error(..), extractValue) where
 
+import Control.Applicative
+import Control.Monad
+
 type Name = String
 
 data Error a =
   Succeeded a |
   Failed String
   deriving (Show)
+
+instance Functor Error where
+  fmap = liftM
+
+instance Applicative Error where
+  pure = return
+  (<*>) = ap
 
 instance Monad Error where
   return a = Succeeded a
