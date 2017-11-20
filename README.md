@@ -68,3 +68,38 @@ THEOREM
 
 is True
 ```
+
+# Using Proper as a library from within a Haskell program
+
+After installing Proper, use put the following code in Main.hs:
+
+```haskell
+import Proper.Formula
+
+main :: IO ()
+main =
+  let a = val "a"
+      thm = theorem [neg $ neg a] a in
+   do
+     putStrLn $ show thm
+     putStrLn $ "is true ? " ++ (show $ checkTheorem thm)
+
+```
+
+This code should print out:
+
+```bash
+bash-3.2$ ghci
+GHCi, version 7.10.3: http://www.haskell.org/ghc/  :? for help
+Prelude> :l Main.hs
+[1 of 1] Compiling Main             ( Main.hs, interpreted )
+Ok, modules loaded: Main.
+*Main> main
+THEOREM
+~(~("a"))
+
+|=
+
+"a"
+is true ? True
+```
